@@ -11,7 +11,7 @@ class Localization {
         return {
             'fr': {
                 'game': {
-                    'title': 'Course de Voitures',
+                    'title': 'Esquive !',
                     'startGame': 'Commencer la partie',
                     'level': 'Niveau',
                     'score': 'Score',
@@ -44,12 +44,9 @@ class Localization {
                     'hell': '25 (Enfer)'
                 },
                 'controls': {
-                    'arrows': 'Flèches pour se déplacer',
-                    'pause': 'P pour mettre en pause',
-                    'restart': 'R pour rejouer',
-                    'debug': 'D pour le mode debug',
-                    'enter': 'Entrée pour commencer',
-                    'escape': 'Échap (x2) pour quitter'
+                    'move': 'Se déplacer',
+                    'pause': 'Pause',
+                    'quit': 'Quitter'
                 },
                 'messages': {
                     'enterNamePrompt': 'Veuillez entrer votre nom !',
@@ -59,7 +56,7 @@ class Localization {
             },
             'en': {
                 'game': {
-                    'title': 'Car Race',
+                    'title': 'Dodge this!',
                     'startGame': 'Start Game',
                     'level': 'Level',
                     'score': 'Score',
@@ -92,12 +89,9 @@ class Localization {
                     'hell': '25 (Hell)'
                 },
                 'controls': {
-                    'arrows': 'Arrow keys to move',
-                    'pause': 'P to pause',
-                    'restart': 'R to restart',
-                    'debug': 'D for debug mode',
-                    'enter': 'Enter to start',
-                    'escape': 'Escape (x2) to quit'
+                    'move': 'Move',
+                    'pause': 'Pause',
+                    'quit': 'Quit'
                 },
                 'messages': {
                     'enterNamePrompt': 'Please enter your name!',
@@ -289,9 +283,3 @@ function t(key, params = {}) {
 }
 
 // L'initialisation sera faite depuis game.js
-// Auto-initialiser quand le DOM est prêt (désactivé)
-// if (document.readyState === 'loading') {
-//     document.addEventListener('DOMContentLoaded', () => i18n.initialize());
-// } else {
-//     i18n.initialize();
-// }

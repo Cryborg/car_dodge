@@ -21,7 +21,6 @@ const GAME_CONSTANTS = {
     LIVES_PER_5_LEVELS: 5,
     LINE_HEIGHT: 100,
     LINE_SPEED_MULTIPLIER: 0.1,
-    COUNTDOWN_TOTAL_FRAMES: 90, // 1.5 secondes à 60fps
     COUNTDOWN_DIGIT_FRAMES: 30 // 0.5 seconde entre chaque chiffre
 };
 
@@ -29,7 +28,6 @@ const GAME_CONSTANTS = {
 const NOTIFICATION_COLORS = {
     POSITIVE: '#f1c40f', // Jaune pour gains (points, vies)
     LEVEL_UP: '#2ecc71', // Vert pour montée de niveau
-    NEGATIVE: '#e74c3c', // Rouge pour pertes
     DEFAULT: '#22c55e'   // Vert par défaut
 };
 
@@ -61,18 +59,6 @@ function createNotification(text, color = NOTIFICATION_COLORS.DEFAULT) {
 }
 
 
-function isInRoadBounds(x) {
-    return x >= GAME_CONSTANTS.ROAD_START && x <= GAME_CONSTANTS.ROAD_END;
-}
-
-function getLaneCenter(laneIndex) {
-    const lanePositions = [51, 118, 185, 252, 319];
-    return lanePositions[laneIndex] || lanePositions[2]; // Par défaut voie centrale
-}
-
-function getRandomLane() {
-    return Math.floor(Math.random() * 5);
-}
 
 // Variable temporaire pour le surlignage du dernier score
 let lastSavedScoreId = null;

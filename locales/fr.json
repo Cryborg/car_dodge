@@ -1,11 +1,10 @@
 {
   "game": {
-    "title": "Course de Voitures",
+    "title": "Esquive !",
     "startGame": "Commencer la partie",
     "level": "Niveau",
     "score": "Score",
     "lives": "Vies",
-    "time": "Temps",
     "pause": "PAUSE",
     "gameOver": "🏁 Partie Terminée !",
     "finalScore": "Score Final",
@@ -17,7 +16,6 @@
     "resetScores": "🗑️ Réinitialiser les scores",
     "levelUp": "NIVEAU {level} !",
     "bonusPoints": "+{points} points",
-    "bonusPoint": "+{points} point",
     "bonusLives": "+{lives} vies",
     "bonusLife": "+{lives} vie",
     "preparingGame": "Préparez-vous...",
@@ -34,12 +32,9 @@
     "hell": "25 (Enfer)"
   },
   "controls": {
-    "arrows": "Flèches pour se déplacer",
-    "pause": "P pour mettre en pause",
-    "restart": "R pour rejouer",
-    "debug": "D pour le mode debug",
-    "enter": "Entrée pour commencer",
-    "escape": "Échap (x2) pour quitter"
+    "move": "Se déplacer",
+    "pause": "Pause",
+    "quit": "Quitter"
   },
   "debug": {
     "title": "MODE DEBUG",
@@ -57,12 +52,5 @@
     "enterNamePrompt": "Veuillez entrer votre nom !",
     "confirmResetScores": "⚠️ Êtes-vous sûr de vouloir supprimer TOUS les scores sauvegardés ?\n\nCette action est irréversible !",
     "scoresReset": "✅ Tous les scores ont été supprimés !"
-  },
-  "ui": {
-    "rank": "#",
-    "name": "Nom",
-    "points": "Points",
-    "level": "Nv",
-    "date": "Date"
   }
 }

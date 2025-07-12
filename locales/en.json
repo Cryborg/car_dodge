@@ -1,11 +1,10 @@
 {
   "game": {
-    "title": "Car Race",
+    "title": "Dodge this!",
     "startGame": "Start Game",
     "level": "Level",
     "score": "Score", 
     "lives": "Lives",
-    "time": "Time",
     "pause": "PAUSE",
     "gameOver": "🏁 Game Over!",
     "finalScore": "Final Score",
@@ -17,7 +16,6 @@
     "resetScores": "🗑️ Reset Scores",
     "levelUp": "LEVEL {level} !",
     "bonusPoints": "+{points} points",
-    "bonusPoint": "+{points} point",
     "bonusLives": "+{lives} lives",
     "bonusLife": "+{lives} life",
     "preparingGame": "Get ready...",
@@ -34,12 +32,9 @@
     "hell": "25 (Hell)"
   },
   "controls": {
-    "arrows": "Arrow keys to move",
-    "pause": "P to pause",
-    "restart": "R to restart",
-    "debug": "D for debug mode",
-    "enter": "Enter to start",
-    "escape": "Escape (x2) to quit"
+    "move": "Move",
+    "pause": "Pause",
+    "quit": "Quit"
   },
   "debug": {
     "title": "DEBUG MODE",
@@ -57,12 +52,5 @@
     "enterNamePrompt": "Please enter your name!",
     "confirmResetScores": "⚠️ Are you sure you want to delete ALL saved scores?\n\nThis action is irreversible!",
     "scoresReset": "✅ All scores have been deleted!"
-  },
-  "ui": {
-    "rank": "#",
-    "name": "Name",
-    "points": "Points", 
-    "level": "Lv",
-    "date": "Date"
   }
 }

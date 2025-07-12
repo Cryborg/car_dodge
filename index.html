@@ -45,12 +45,22 @@
     <div id="startScreen">
         <h1 data-i18n="game.title">🏁 Course Infinie</h1>
         <div id="instructions">
-            <span data-i18n="controls.arrows">Utilise les flèches ← → pour éviter le trafic !</span><br>
-            <span data-i18n="controls.pause">P pour mettre en pause</span><br>
-            <span data-i18n="controls.restart">R pour rejouer</span><br>
-            <span data-i18n="controls.debug">D pour le mode debug</span><br>
-            <span data-i18n="controls.enter">Entrée pour commencer</span><br>
-            <span data-i18n="controls.escape">Échap (x2) pour quitter</span>
+            <div class="controls-grid">
+                <div class="keys-group">
+                    <span class="key">←</span>
+                    <span class="key">→</span>
+                </div>
+                <div class="action-column" data-i18n="controls.move">Se déplacer</div>
+                <div class="keys-group">
+                    <span class="key">P</span>
+                </div>
+                <div class="action-column" data-i18n="controls.pause">Pause</div>
+                <div class="keys-group">
+                    <span class="key small">Échap</span>
+                    <span class="key small">Échap</span>
+                </div>
+                <div class="action-column" data-i18n="controls.quit">Quitter</div>
+            </div>
         </div>
         <h2 data-i18n="game.chooseLevel">Choisis ton niveau de départ :</h2>
         <div class="level-selector">
