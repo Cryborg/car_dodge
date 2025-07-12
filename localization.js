@@ -50,6 +50,11 @@ class Localization {
                     'debug': 'D pour le mode debug',
                     'enter': 'Entrée pour commencer',
                     'escape': 'Échap (x2) pour quitter'
+                },
+                'messages': {
+                    'enterNamePrompt': 'Veuillez entrer votre nom !',
+                    'confirmResetScores': '⚠️ Êtes-vous sûr de vouloir supprimer TOUS les scores sauvegardés ?\n\nCette action est irréversible !',
+                    'scoresReset': '✅ Tous les scores ont été supprimés !'
                 }
             },
             'en': {
@@ -93,6 +98,11 @@ class Localization {
                     'debug': 'D for debug mode',
                     'enter': 'Enter to start',
                     'escape': 'Escape (x2) to quit'
+                },
+                'messages': {
+                    'enterNamePrompt': 'Please enter your name!',
+                    'confirmResetScores': '⚠️ Are you sure you want to delete ALL saved scores?\n\nThis action is irreversible!',
+                    'scoresReset': '✅ All scores have been deleted!'
                 }
             }
         };

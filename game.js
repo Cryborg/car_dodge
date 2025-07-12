@@ -25,6 +25,14 @@ const GAME_CONSTANTS = {
     COUNTDOWN_DIGIT_FRAMES: 30 // 0.5 seconde entre chaque chiffre
 };
 
+// Couleurs des notifications
+const NOTIFICATION_COLORS = {
+    POSITIVE: '#f1c40f', // Jaune pour gains (points, vies)
+    LEVEL_UP: '#2ecc71', // Vert pour montée de niveau
+    NEGATIVE: '#e74c3c', // Rouge pour pertes
+    DEFAULT: '#22c55e'   // Vert par défaut
+};
+
 // Tailles des véhicules
 const VEHICLE_SIZES = {
     car: { width: 30, height: 40, hitboxWidth: 25, hitboxHeight: 35 },
@@ -42,7 +50,7 @@ function createCollisionEffect(x, y) {
     };
 }
 
-function createNotification(text, color = '#22c55e') {
+function createNotification(text, color = NOTIFICATION_COLORS.DEFAULT) {
     gameState.livesNotification = {
         text: text,
         color: color,
@@ -66,10 +74,14 @@ function getRandomLane() {
     return Math.floor(Math.random() * 5);
 }
 
+// Variable temporaire pour le surlignage du dernier score
+let lastSavedScoreId = null;
+
 let gameState = {
     running: false,
     paused: false,
     level: 1,
+    gameAbandoned: false, // Flag pour savoir si la partie a été abandonnée
     score: 0,
     timeLeft: GAME_CONSTANTS.LEVEL_DURATION,
     lives: 5,
@@ -186,7 +198,8 @@ document.addEventListener('keydown', (e) => {
     // Commencer avec Entrée
     if (e.key === 'Enter') {
         if (!gameState.running) {
-            const level = parseInt(document.getElementById('levelSlider').value);
+            // En mode debug, utiliser le niveau actuel, sinon utiliser le slider
+            const level = gameState.debugMode.active ? gameState.level : parseInt(document.getElementById('levelSlider').value);
             startNewGame(level);
         } else if (document.getElementById('scoreForm').style.display !== 'none') {
             saveScore();
@@ -199,6 +212,7 @@ document.addEventListener('keydown', (e) => {
         if (currentTime - gameState.lastEscapeTime < 1000) {
             gameState.escapePressed++;
             if (gameState.escapePressed >= 2) {
+                gameState.gameAbandoned = true;
                 endGame();
                 return;
             }
@@ -221,6 +235,10 @@ function startCountdown(onComplete) {
 }
 
 function startNewGame(level) {
+    // Réinitialiser le surlignage du dernier score et le flag d'abandon
+    lastSavedScoreId = null;
+    gameState.gameAbandoned = false;
+    
     // S'assurer que toutes les images essentielles sont chargées avant de commencer
     if (!gameState.explosionImage || !gameState.explosionImage.complete || 
         !gameState.starBonusImage || !gameState.starBonusImage.complete ||
@@ -233,7 +251,7 @@ function startNewGame(level) {
     document.getElementById('startScreen').style.display = 'none';
     document.getElementById('gameOverScreen').style.display = 'none';
     
-    startCountdown(() => startGame(level));
+    startCountdown(() => startGame(gameState.debugMode.active ? gameState.level : level));
     gameLoop();
 }
 
@@ -245,7 +263,7 @@ function startGame(level) {
     gameState.running = true;
     gameState.score = 0;
     gameState.timeLeft = GAME_CONSTANTS.LEVEL_DURATION;
-    gameState.lives = 5;
+    gameState.lives = gameState.debugMode.active ? 999 : 5;
     gameState.playerX = GAME_CONSTANTS.PLAYER_START_X;
     gameState.playerVelocityX = 0;
     gameState.cars = [];
@@ -555,7 +573,7 @@ function startBossExit() {
         // Ajouter 5 vies tous les 5 niveaux
         if (gameState.level % 5 === 0) {
             gameState.lives += 5;
-            createNotification(t('game.bonusLives', { lives: 5 }), '#22c55e');
+            createNotification(t('game.bonusLives', { lives: 5 }), NOTIFICATION_COLORS.POSITIVE);
         }
         document.getElementById('levelDisplay').textContent = gameState.level;
         showLevelUpMessage();
@@ -792,11 +810,11 @@ function checkCollisions() {
             if (bonus.type === 'heart') {
                 // Bonus cœur : +1 vie
                 gameState.lives += 1;
-                createNotification(t('game.bonusLife', { lives: 1 }), '#e74c3c');
+                createNotification(t('game.bonusLife', { lives: 1 }), NOTIFICATION_COLORS.POSITIVE);
             } else {
                 // Bonus étoile (par défaut) : +5 points
                 gameState.score += 5;
-                createNotification(t('game.bonusPoints', { points: 5 }), '#f1c40f');
+                createNotification(t('game.bonusPoints', { points: 5 }), NOTIFICATION_COLORS.POSITIVE);
             }
             return false;
         }
@@ -866,28 +884,7 @@ function checkLevelProgression() {
 }
 
 function showLevelUpMessage() {
-    const message = document.createElement('div');
-    message.style.position = 'absolute';
-    message.style.top = '20px';
-    message.style.left = '50%';
-    message.style.transform = 'translateX(-50%)';
-    message.style.background = 'rgba(46, 204, 113, 0.9)';
-    message.style.color = 'white';
-    message.style.padding = '15px 25px';
-    message.style.borderRadius = '10px';
-    message.style.fontSize = '18px';
-    message.style.fontWeight = 'bold';
-    message.style.zIndex = '30';
-    message.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-    message.textContent = t('game.levelUp', { level: gameState.level });
-
-    document.getElementById('gameContainer').appendChild(message);
-
-    setTimeout(() => {
-        if (message.parentNode) {
-            message.parentNode.removeChild(message);
-        }
-    }, 2000);
+    createNotification(t('game.levelUp', { level: gameState.level }), NOTIFICATION_COLORS.LEVEL_UP);
 }
 
 function updateTime(deltaTime) {
@@ -1045,12 +1042,6 @@ function drawBombs() {
             ctx.arc(bomb.x, bomb.y, 10, 0, Math.PI * 2);
             ctx.stroke();
             
-            // Indicateur de cible
-            ctx.strokeStyle = 'rgba(231, 76, 60, 0.2)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(bomb.targetX, bomb.targetY, 30, 0, Math.PI * 2);
-            ctx.stroke();
             
         } else if (bomb.phase === 'exploding') {
             // Phase d'explosion
@@ -1059,7 +1050,7 @@ function drawBombs() {
             const opacity = Math.max(0, 1 - explosionProgress);
             
             // Seulement dessiner si l'opacité est suffisamment élevée
-            if (opacity > 0.01) {
+            if (opacity > 0.1) {
                 // Explosion principale
                 ctx.fillStyle = `rgba(255, 100, 0, ${opacity * 0.6})`;
                 ctx.beginPath();
@@ -1287,18 +1278,20 @@ function updateProgressBar() {
         progressText.textContent = `Boss ${Math.ceil(bossTimeLeft)}s`;
     } else {
         // Mode normal : barre verte qui se vide selon le temps de niveau restant
-        const levelProgress = (gameState.timeLeft / GAME_CONSTANTS.LEVEL_DURATION) * 100;
+        const currentTime = performance.now();
+        const timeSinceLevel = (currentTime - gameState.levelStartTime) / 1000;
+        const timeLeft = Math.max(0, gameState.levelDuration - timeSinceLevel);
+        const levelProgress = (timeLeft / gameState.levelDuration) * 100;
         
         progressBar.style.width = Math.max(0, levelProgress) + '%';
         progressBar.className = 'progress-bar';
-        progressText.textContent = `${Math.max(0, Math.ceil(gameState.timeLeft))}s`;
+        progressText.textContent = `${Math.ceil(timeLeft)}s`;
     }
 }
 
 function updateLeaderboard() {
     const highScores = JSON.parse(localStorage.getItem('highScores')) || [];
     const liveScoresList = document.getElementById('liveScoresList');
-    const lastSavedScoreId = localStorage.getItem('lastSavedScoreId');
     
     if (highScores.length === 0) {
         liveScoresList.innerHTML = `<div style="text-align: center; color: #bdc3c7; font-size: 12px;">${t('game.noScores')}</div>`;
@@ -1306,7 +1299,7 @@ function updateLeaderboard() {
     }
     
     liveScoresList.innerHTML = highScores.slice(0, 10).map((score, index) => {
-        const isLastSaved = score.id && score.id.toString() === lastSavedScoreId;
+        const isLastSaved = score.id && score.id.toString() === lastSavedScoreId?.toString();
         const highlightClass = isLastSaved ? ' last-saved-score' : '';
         return `
             <div class="live-score-item${highlightClass}">
@@ -1410,6 +1403,9 @@ function endGame() {
     const nameInput = document.getElementById('playerName');
     nameInput.value = gameState.lastPlayerName;
     
+    // S'assurer que le formulaire de score est visible seulement si la partie n'a pas été abandonnée
+    document.getElementById('scoreForm').style.display = gameState.gameAbandoned ? 'none' : 'block';
+    
     // Afficher les scores et l'écran de fin
     displayHighScores();
     document.getElementById('gameOverScreen').style.display = 'flex';
@@ -1445,14 +1441,19 @@ function saveScore() {
     
     highScores.push(newScore);
     
+    // Stocker l'ID du dernier score sauvegardé pour le surlignage temporaire
+    // (le faire AVANT de trier et tronquer pour s'assurer qu'il soit défini)
+    lastSavedScoreId = newScore.id;
+    
     // Trier par score décroissant et garder seulement les 10 meilleurs
     highScores.sort((a, b) => b.score - a.score);
     highScores = highScores.slice(0, 10);
     
-    // Stocker l'ID du dernier score sauvegardé
+    // Vérifier si le score est toujours dans le top 10 après tri
     const savedScore = highScores.find(score => score.id === newScore.id);
-    if (savedScore) {
-        localStorage.setItem('lastSavedScoreId', newScore.id);
+    if (!savedScore) {
+        // Le score n'est pas dans le top 10, ne pas le surligner
+        lastSavedScoreId = null;
     }
     
     // Sauvegarder
@@ -1622,6 +1623,10 @@ ${t('debug.enterChoice')}`);
         case '1':
             gameState.debugMode.active = false;
             gameState.debugMode.vehicleFilter = 'normal';
+            // Réinitialiser les vies à la normale si on était en jeu
+            if (gameState.running && gameState.lives === 999) {
+                gameState.lives = 5;
+            }
             break;
         case '2':
             gameState.debugMode.active = true;
@@ -1644,7 +1649,8 @@ ${t('debug.enterChoice')}`);
     }
     
     // Démarrer le jeu avec le mode debug
-    const level = parseInt(document.getElementById('levelSlider').value);
+    // En mode debug, utiliser le niveau actuel s'il a été modifié, sinon utiliser le slider
+    const level = gameState.debugMode.active ? gameState.level : parseInt(document.getElementById('levelSlider').value);
     startNewGame(level);
 }
 
