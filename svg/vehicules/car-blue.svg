@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="250px" height="450px" viewBox="0 0 250 450" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Voiture vue de dessus (orientée vers le haut)</title>
+    <defs>
+        <!-- Filtre pour créer un effet d'ombre floue -->
+        <filter x="-10%" y="-10%" width="120%" height="120%" id="shadow">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3"></feGaussianBlur>
+            <feOffset dx="3" dy="5" result="offsetblur"></feOffset>
+            <feComponentTransfer>
+                <feFuncA type="linear" slope="0.3"></feFuncA>
+            </feComponentTransfer>
+            <feMerge>
+                <feMergeNode></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Voiture" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Groupe principal pour la voiture avec la rotation et l'ombre appliquée -->
+        <g id="Car-Group" transform="translate(-75, 125) rotate(90 200 100)" filter="url(#shadow)">
+
+            <!-- Carrosserie principale -->
+            <path d="M 40,200 C 10,150 10,50 40,0 L 360,0 C 390,50 390,150 360,200 L 40,200 Z" id="Body" fill="#3498DB" stroke="#2980B9" stroke-width="3"></path>
+
+            <!-- Capot avec des lignes de style -->
+            <path d="M 55,40 L 120,40 L 120,160 L 55,160" id="Hood-Lines" stroke="#2980B9" stroke-width="1.5"></path>
+
+            <!-- Habitacle / Toit -->
+            <rect id="Cabin" fill="#2980B9" stroke="#1F618D" stroke-width="2" x="120" y="25" width="160" height="150" rx="15"></rect>
+
+            <!-- Pare-brise avant -->
+            <path d="M 130,35 L 170,40 L 170,160 L 130,165 Z" id="Windshield-Front" fill="#A9CCE3"></path>
+
+            <!-- Lunette arrière -->
+            <path d="M 270,40 L 230,35 L 230,165 L 270,160 Z" id="Windshield-Rear" fill="#A9CCE3"></path>
+
+            <!-- Fenêtres latérales -->
+            <rect id="Window-Side-Top" fill="#A9CCE3" x="175" y="27" width="50" height="10" rx="5"></rect>
+            <rect id="Window-Side-Bottom" fill="#A9CCE3" x="175" y="163" width="50" height="10" rx="5"></rect>
+
+            <!-- Phares avant -->
+            <path d="M 42,30 C 55,35, 55,50 42,55 L 42,30 Z" id="Headlight-Left" fill="#F1C40F"></path>
+            <path d="M 42,170 C 55,165, 55,150 42,145 L 42,170 Z" id="Headlight-Right" fill="#F1C40F"></path>
+
+            <!-- Feux arrière -->
+            <rect id="Taillight-Left" fill="#E74C3C" x="355" y="40" width="8" height="25" rx="3"></rect>
+            <rect id="Taillight-Right" fill="#E74C3C" x="355" y="135" width="8" height="25" rx="3"></rect>
+
+            <!-- Rétroviseurs -->
+            <path d="M 120,15 L 105,10 L 105,25 Z" id="Mirror-Left" fill="#5D6D7E"></path>
+            <path d="M 120,185 L 105,190 L 105,175 Z" id="Mirror-Right" fill="#5D6D7E"></path>
+
+            <!-- Poignées de porte -->
+            <rect id="Handle-1" fill="#1F618D" x="180" y="45" width="20" height="5" rx="2.5"></rect>
+            <rect id="Handle-2" fill="#1F618D" x="180" y="150" width="20" height="5" rx="2.5"></rect>
+        </g>
+    </g>
+</svg>

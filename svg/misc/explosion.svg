@@ -1,0 +1,49 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Explosion style BD -->
+    <defs>
+        <!-- Gradient pour l'explosion -->
+        <radialGradient id="explosionGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#ffff00;stop-opacity:1" />
+            <stop offset="60%" style="stop-color:#ff8800;stop-opacity:0.9" />
+            <stop offset="100%" style="stop-color:#ff0000;stop-opacity:0.7" />
+        </radialGradient>
+    </defs>
+    
+    <!-- Étoile d'explosion principal -->
+    <path d="M50,10 L55,35 L80,30 L60,50 L85,65 L55,55 L50,85 L45,55 L15,65 L40,50 L20,30 L45,35 Z" 
+          fill="url(#explosionGrad)" 
+          stroke="#ff0000" 
+          stroke-width="2"/>
+    
+    <!-- Rayons secondaires -->
+    <path d="M50,5 L52,25 M50,95 L48,75 M5,50 L25,48 M95,50 L75,52" 
+          stroke="#ffff00" 
+          stroke-width="3" 
+          stroke-linecap="round"/>
+    
+    <!-- Petites étoiles autour -->
+    <path d="M25,25 L27,30 L32,28 L29,33 L34,35 L29,37 L27,42 L25,37 L20,35 L25,33 L23,28 Z" 
+          fill="#ffff00" 
+          stroke="#ff8800" 
+          stroke-width="1"/>
+    
+    <path d="M75,20 L77,25 L82,23 L79,28 L84,30 L79,32 L77,37 L75,32 L70,30 L75,28 L73,23 Z" 
+          fill="#ffff00" 
+          stroke="#ff8800" 
+          stroke-width="1"/>
+    
+    <path d="M20,75 L22,80 L27,78 L24,83 L29,85 L24,87 L22,92 L20,87 L15,85 L20,83 L18,78 Z" 
+          fill="#ffff00" 
+          stroke="#ff8800" 
+          stroke-width="1"/>
+    
+    <!-- Texte CRASH style BD -->
+    <text x="50" y="55" 
+          font-family="Arial, sans-serif" 
+          font-size="12" 
+          font-weight="bold" 
+          text-anchor="middle" 
+          fill="#ffffff" 
+          stroke="#000000" 
+          stroke-width="1">CRASH!</text>
+</svg>

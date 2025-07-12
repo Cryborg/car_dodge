@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="250px" height="450px" viewBox="0 0 250 450" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Tesla vue de dessus</title>
+    <defs>
+        <!-- Filtre pour créer un effet d'ombre floue -->
+        <filter x="-10%" y="-10%" width="120%" height="120%" id="shadow">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="4"></feGaussianBlur>
+            <feOffset dx="3" dy="5" result="offsetblur"></feOffset>
+            <feComponentTransfer>
+                <feFuncA type="linear" slope="0.25"></feFuncA>
+            </feComponentTransfer>
+            <feMerge>
+                <feMergeNode></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Voiture" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Groupe principal pour la voiture avec la rotation et l'ombre appliquée -->
+        <g id="Car-Group" transform="translate(-75, 125) rotate(90 200 100)" filter="url(#shadow)">
+
+            <!-- Carrosserie principale - Forme plus arrondie et couleur blanche -->
+            <path d="M 40,200 C 10,150 10,50 40,0 L 360,0 C 390,50 390,150 360,200 L 40,200 Z" id="Body" fill="#F4F4F4" stroke="#BDBDBD" stroke-width="2"></path>
+
+            <!-- Logo Tesla sur le capot -->
+            <g id="Tesla-Logo" transform="translate(70, 85)" fill="#BDBDBD">
+                <path d="M 0,0 L 20,0 L 10,15 Z"></path>
+                <rect x="5" y="0" width="10" height="10"></rect>
+            </g>
+
+            <!-- Toit panoramique en verre -->
+            <path d="M 125,25 C 130,15, 270,15, 275,25 L 295,100 L 275,175 C 270,185, 130,185, 125,175 L 105,100 Z" id="Glass-Roof" fill="#2C3E50" stroke="#424242" stroke-width="1.5"></path>
+
+            <!-- Phares avant - Style Tesla -->
+            <path d="M 42,35 C 55,40, 60,50, 42,55" id="Headlight-Left" stroke="#85C1E9" stroke-width="3" fill="none"></path>
+            <path d="M 42,165 C 55,160, 60,150, 42,145" id="Headlight-Right" stroke="#85C1E9" stroke-width="3" fill="none"></path>
+
+            <!-- Feux arrière -->
+            <path d="M 358,40 L 358,65 C 350,60, 350,45, 358,40 Z" id="Taillight-Left" fill="#E74C3C"></path>
+            <path d="M 358,160 L 358,135 C 350,140, 350,155, 358,160 Z" id="Taillight-Right" fill="#E74C3C"></path>
+
+            <!-- Rétroviseurs -->
+            <path d="M 105,15 L 95,10 L 95,25 Z" id="Mirror-Left" fill="#BDBDBD"></path>
+            <path d="M 105,185 L 95,190 L 95,175 Z" id="Mirror-Right" fill="#BDBDBD"></path>
+
+            <!-- Poignées de porte affleurantes -->
+            <rect id="Handle-1" fill="#BDBDBD" x="115" y="45" width="25" height="4" rx="2"></rect>
+            <rect id="Handle-2" fill="#BDBDBD" x="115" y="151" width="25" height="4" rx="2"></rect>
+        </g>
+    </g>
+</svg>

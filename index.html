@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Infinie</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="mainContainer">
+    <div id="sidePanel">
+        <div class="stat-item">
+            <div class="stat-label">Temps</div>
+            <div class="stat-value"><span id="timeDisplay">60</span>s</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Score</div>
+            <div class="stat-value" id="scoreDisplay">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Vies</div>
+            <div class="stat-value" id="livesDisplay">5</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Niveau</div>
+            <div class="stat-value"><span id="levelDisplay">1</span>/25</div>
+        </div>
+    </div>
+
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+    <div id="startScreen">
+        <h1>🏁 Course Infinie</h1>
+        <div id="instructions">
+            Utilise les flèches ← → pour éviter le trafic !<br>
+            Récupère les bonus ⭐ pour gagner du temps<br>
+            Évite les collisions qui te font perdre du temps<br>
+            Double Escape pour quitter la partie<br>
+            P pour mettre en pause la partie
+        </div>
+        <h2>Choisis ton niveau de départ :</h2>
+        <div class="level-selector">
+            <label for="levelSlider">Niveau : <span id="levelValue">1</span></label>
+            <input type="range" id="levelSlider" min="1" max="25" value="1" class="slider">
+            <div class="level-descriptions">
+                <span class="level-mark">1 (Facile)</span>
+                <span class="level-mark">6 (Normal)</span>
+                <span class="level-mark">12 (Difficile)</span>
+                <span class="level-mark">18 (Expert)</span>
+                <span class="level-mark">25 (Enfer)</span>
+            </div>
+        </div>
+        <button class="start-btn" onclick="startGameFromSlider()">Commencer la partie</button>
+    </div>
+
+    <div id="gameOverScreen" style="display: none;">
+        <h1>🏁 Partie Terminée !</h1>
+        <h2 id="finalScore">Score Final: 0</h2>
+        <div id="scoreForm">
+            <label for="playerName">Votre nom :</label>
+            <input type="text" id="playerName" placeholder="Entrez votre nom" maxlength="20" onkeydown="handleNameInput(event)">
+            <button onclick="saveScore()">Sauvegarder le Score</button>
+        </div>
+        <button onclick="resetScores()" style="background: #e74c3c; margin-top: 10px;">🗑️ Réinitialiser les Scores</button>
+        <button onclick="showStartScreen()">Rejouer</button>
+    </div>
+</div>
+
+    <div id="leaderboardPanel">
+        <h3>🏆 Classement</h3>
+        <div id="liveScoresList">
+            <div style="text-align: center; color: #bdc3c7;">Chargement...</div>
+        </div>
+    </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

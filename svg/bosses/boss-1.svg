@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Soucoupe Volante (vue de côté)</title>
+    <defs>
+        <!-- Dégradé pour le corps métallique de la soucoupe -->
+        <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" r="75%" id="metal-gradient">
+            <stop stop-color="#E0E0E0" offset="0%"></stop>
+            <stop stop-color="#A0A0A0" offset="100%"></stop>
+        </radialGradient>
+
+        <!-- Dégradé pour le dôme en verre -->
+        <radialGradient cx="50%" cy="20%" fx="50%" fy="20%" r="80%" id="glass-gradient">
+            <stop stop-color="#FFFFFF" stop-opacity="0.8" offset="0%"></stop>
+            <stop stop-color="#85C1E9" stop-opacity="0.5" offset="100%"></stop>
+        </radialGradient>
+
+        <!-- Dégradé pour le rayon tracteur -->
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="beam-gradient">
+            <stop stop-color="#F1C40F" stop-opacity="0.7" offset="0%"></stop>
+            <stop stop-color="#F1C40F" stop-opacity="0" offset="100%"></stop>
+        </linearGradient>
+
+        <!-- Filtre pour l'effet de lueur -->
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="3.5" result="coloredBlur"></feGaussianBlur>
+            <feMerge>
+                <feMergeNode in="coloredBlur"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Soucoupe-Volante" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Groupe principal pour la soucoupe, centré dans le canevas -->
+        <g transform="translate(50, 100)">
+
+            <!-- Rayon tracteur (en premier pour qu'il soit en arrière-plan) -->
+            <polygon id="Tractor-Beam" fill="url(#beam-gradient)" points="100 120 200 120 250 250 50 250"></polygon>
+
+            <!-- Corps principal de la soucoupe -->
+            <ellipse id="Main-Body" fill="url(#metal-gradient)" stroke="#757575" stroke-width="2" cx="150" cy="100" rx="150" ry="40"></ellipse>
+
+            <!-- Dôme en verre sur le dessus -->
+            <path d="M 75,100 C 75,50, 225,50, 225,100 L 75,100 Z" id="Glass-Dome" fill="url(#glass-gradient)" stroke="#5D6D7E"></path>
+
+            <!-- Lumières clignotantes sous la soucoupe -->
+            <g id="Lights" filter="url(#glow)">
+                <circle id="Light-1" fill="#2ECC71" cx="60" cy="115" r="8"></circle>
+                <circle id="Light-2" fill="#E74C3C" cx="110" cy="120" r="8"></circle>
+                <circle id="Light-3" fill="#3498DB" cx="190" cy="120" r="8"></circle>
+                <circle id="Light-4" fill="#F1C40F" cx="240" cy="115" r="8"></circle>
+            </g>
+        </g>
+    </g>
+</svg>
