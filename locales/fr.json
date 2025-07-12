@@ -1,0 +1,68 @@
+{
+  "game": {
+    "title": "Course de Voitures",
+    "startGame": "Commencer la partie",
+    "level": "Niveau",
+    "score": "Score",
+    "lives": "Vies",
+    "time": "Temps",
+    "pause": "PAUSE",
+    "gameOver": "🏁 Partie Terminée !",
+    "finalScore": "Score Final",
+    "enterName": "Entrez votre nom",
+    "saveScore": "Sauvegarder",
+    "backToMenu": "Rejouer",
+    "bestScores": "Meilleurs Scores",
+    "noScores": "Aucun score",
+    "resetScores": "🗑️ Réinitialiser les scores",
+    "levelUp": "NIVEAU {level} !",
+    "bonusPoints": "+{points} points",
+    "bonusPoint": "+{points} point",
+    "bonusLives": "+{lives} vies",
+    "bonusLife": "+{lives} vie",
+    "preparingGame": "Préparez-vous...",
+    "resumeGame": "Appuyez sur P pour reprendre",
+    "chooseLevel": "Choisis ton niveau de départ :",
+    "loading": "Chargement...",
+    "progress": "Progression"
+  },
+  "difficulty": {
+    "easy": "1 (Facile)",
+    "normal": "6 (Normal)",
+    "hard": "12 (Difficile)",
+    "expert": "18 (Expert)",
+    "hell": "25 (Enfer)"
+  },
+  "controls": {
+    "arrows": "Flèches pour se déplacer",
+    "pause": "P pour mettre en pause",
+    "restart": "R pour rejouer",
+    "debug": "D pour le mode debug",
+    "enter": "Entrée pour commencer",
+    "escape": "Échap (x2) pour quitter"
+  },
+  "debug": {
+    "title": "MODE DEBUG",
+    "normalMode": "Mode normal (tous véhicules)",
+    "carsOnly": "Que des voitures",
+    "trucksOnly": "Que des camions",
+    "motosOnly": "Que des motos",
+    "bossMode": "Que des boss (mode boss permanent)",
+    "chooseVehicles": "Mode Debug - Choisissez le type de véhicules à tester :",
+    "enterChoice": "Tapez le numéro de votre choix :",
+    "bossLevel": "Boss permanent (Niveau {level})",
+    "changeLevelHint": "+/- pour changer niveau"
+  },
+  "messages": {
+    "enterNamePrompt": "Veuillez entrer votre nom !",
+    "confirmResetScores": "⚠️ Êtes-vous sûr de vouloir supprimer TOUS les scores sauvegardés ?\n\nCette action est irréversible !",
+    "scoresReset": "✅ Tous les scores ont été supprimés !"
+  },
+  "ui": {
+    "rank": "#",
+    "name": "Nom",
+    "points": "Points",
+    "level": "Nv",
+    "date": "Date"
+  }
+}

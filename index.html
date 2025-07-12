@@ -3,26 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Infinie</title>
+    <title data-i18n="game.title">Course Infinie</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div id="mainContainer">
     <div id="sidePanel">
+        <!-- Sélecteur de langue -->
+        <div class="language-selector">
+            <label for="languageSelect" class="sr-only">Language</label>
+            <select id="languageSelect" onchange="changeLanguage(this.value)">
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en">🇺🇸 English</option>
+            </select>
+        </div>
+        
         <div class="stat-item">
-            <div class="stat-label">Temps</div>
-            <div class="stat-value"><span id="timeDisplay">60</span>s</div>
+            <div class="stat-label" data-i18n="game.progress">Progression</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText">30s</div>
+            </div>
         </div>
         <div class="stat-item">
-            <div class="stat-label">Score</div>
+            <div class="stat-label" data-i18n="game.score">Score</div>
             <div class="stat-value" id="scoreDisplay">0</div>
         </div>
         <div class="stat-item">
-            <div class="stat-label">Vies</div>
+            <div class="stat-label" data-i18n="game.lives">Vies</div>
             <div class="stat-value" id="livesDisplay">5</div>
         </div>
         <div class="stat-item">
-            <div class="stat-label">Niveau</div>
+            <div class="stat-label" data-i18n="game.level">Niveau</div>
             <div class="stat-value"><span id="levelDisplay">1</span>/25</div>
         </div>
     </div>
@@ -31,50 +43,52 @@
         <canvas id="gameCanvas" width="400" height="600"></canvas>
 
     <div id="startScreen">
-        <h1>🏁 Course Infinie</h1>
+        <h1 data-i18n="game.title">🏁 Course Infinie</h1>
         <div id="instructions">
-            Utilise les flèches ← → pour éviter le trafic !<br>
-            Récupère les bonus ⭐ pour gagner du temps<br>
-            Évite les collisions qui te font perdre du temps<br>
-            Double Escape pour quitter la partie<br>
-            P pour mettre en pause la partie
+            <span data-i18n="controls.arrows">Utilise les flèches ← → pour éviter le trafic !</span><br>
+            <span data-i18n="controls.pause">P pour mettre en pause</span><br>
+            <span data-i18n="controls.restart">R pour rejouer</span><br>
+            <span data-i18n="controls.debug">D pour le mode debug</span><br>
+            <span data-i18n="controls.enter">Entrée pour commencer</span><br>
+            <span data-i18n="controls.escape">Échap (x2) pour quitter</span>
         </div>
-        <h2>Choisis ton niveau de départ :</h2>
+        <h2 data-i18n="game.chooseLevel">Choisis ton niveau de départ :</h2>
         <div class="level-selector">
-            <label for="levelSlider">Niveau : <span id="levelValue">1</span></label>
+            <label for="levelSlider"><span data-i18n="game.level">Niveau</span> : <span id="levelValue">1</span></label>
             <input type="range" id="levelSlider" min="1" max="25" value="1" class="slider">
             <div class="level-descriptions">
-                <span class="level-mark">1 (Facile)</span>
-                <span class="level-mark">6 (Normal)</span>
-                <span class="level-mark">12 (Difficile)</span>
-                <span class="level-mark">18 (Expert)</span>
-                <span class="level-mark">25 (Enfer)</span>
+                <span class="level-mark" data-i18n="difficulty.easy">1 (Facile)</span>
+                <span class="level-mark" data-i18n="difficulty.normal">6 (Normal)</span>
+                <span class="level-mark" data-i18n="difficulty.hard">12 (Difficile)</span>
+                <span class="level-mark" data-i18n="difficulty.expert">18 (Expert)</span>
+                <span class="level-mark" data-i18n="difficulty.hell">25 (Enfer)</span>
             </div>
         </div>
-        <button class="start-btn" onclick="startGameFromSlider()">Commencer la partie</button>
+        <button class="start-btn" onclick="startGameFromSlider()" data-i18n="game.startGame">Commencer la partie</button>
     </div>
 
     <div id="gameOverScreen" style="display: none;">
-        <h1>🏁 Partie Terminée !</h1>
-        <h2 id="finalScore">Score Final: 0</h2>
+        <h1 data-i18n="game.gameOver">🏁 Partie Terminée !</h1>
+        <h2 id="finalScore"><span data-i18n="game.finalScore">Score Final</span>: 0</h2>
         <div id="scoreForm">
-            <label for="playerName">Votre nom :</label>
-            <input type="text" id="playerName" placeholder="Entrez votre nom" maxlength="20" onkeydown="handleNameInput(event)">
-            <button onclick="saveScore()">Sauvegarder le Score</button>
+            <label for="playerName" data-i18n="game.enterName">Votre nom :</label>
+            <input type="text" id="playerName" data-i18n-placeholder="game.enterName" maxlength="20" onkeydown="handleNameInput(event)">
+            <button onclick="saveScore()" data-i18n="game.saveScore">Sauvegarder le Score</button>
         </div>
-        <button onclick="resetScores()" style="background: #e74c3c; margin-top: 10px;">🗑️ Réinitialiser les Scores</button>
-        <button onclick="showStartScreen()">Rejouer</button>
+        <button onclick="resetScores()" style="background: #e74c3c; margin-top: 10px;" data-i18n="game.resetScores">🗑️ Réinitialiser les Scores</button>
+        <button onclick="showStartScreen()" data-i18n="game.backToMenu">Rejouer</button>
     </div>
 </div>
 
     <div id="leaderboardPanel">
-        <h3>🏆 Classement</h3>
+        <h3 data-i18n="game.bestScores">🏆 Classement</h3>
         <div id="liveScoresList">
-            <div style="text-align: center; color: #bdc3c7;">Chargement...</div>
+            <div style="text-align: center; color: #bdc3c7;" data-i18n="game.loading">Chargement...</div>
         </div>
     </div>
 </div>
 
+<script src="localization.js"></script>
 <script src="game.js"></script>
 </body>
 </html>

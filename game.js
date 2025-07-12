@@ -16,7 +16,7 @@ const GAME_CONSTANTS = {
     COLLISION_EFFECT_DURATION: 15,
     CRASH_ANIMATION_DURATION: 20,
     MAX_LEVEL: 25,
-    LEVEL_DURATION: 25,
+    LEVEL_DURATION: 30,
     BOSS_DURATION: 10,
     LIVES_PER_5_LEVELS: 5,
     LINE_HEIGHT: 100,
@@ -52,6 +52,7 @@ function createNotification(text, color = '#22c55e') {
     };
 }
 
+
 function isInRoadBounds(x) {
     return x >= GAME_CONSTANTS.ROAD_START && x <= GAME_CONSTANTS.ROAD_END;
 }
@@ -70,7 +71,7 @@ let gameState = {
     paused: false,
     level: 1,
     score: 0,
-    timeLeft: 60,
+    timeLeft: GAME_CONSTANTS.LEVEL_DURATION,
     lives: 5,
     playerX: GAME_CONSTANTS.PLAYER_START_X,
     playerY: GAME_CONSTANTS.PLAYER_START_Y,
@@ -100,6 +101,7 @@ let gameState = {
     collisionEffect: null,
     explosionImage: null,
     starBonusImage: null,
+    heartBonusImage: null,
     livesNotification: null,
     countdown: {
         active: false,
@@ -164,8 +166,8 @@ document.addEventListener('keydown', (e) => {
         if (e.key === '+' || e.key === '=') {
             gameState.level = gameState.level >= 25 ? 1 : gameState.level + 1;
             document.getElementById('levelDisplay').textContent = gameState.level;
-            // Redémarrer le boss avec le nouveau niveau si en mode boss
-            if (gameState.boss) {
+            // Redémarrer le boss avec le nouveau niveau si en mode boss (mais pas s'il part)
+            if (gameState.boss && !gameState.boss.isLeaving) {
                 startBossMode();
             }
             return;
@@ -173,8 +175,8 @@ document.addEventListener('keydown', (e) => {
         if (e.key === '-' || e.key === '_') {
             gameState.level = gameState.level <= 1 ? 25 : gameState.level - 1;
             document.getElementById('levelDisplay').textContent = gameState.level;
-            // Redémarrer le boss avec le nouveau niveau si en mode boss
-            if (gameState.boss) {
+            // Redémarrer le boss avec le nouveau niveau si en mode boss (mais pas s'il part)
+            if (gameState.boss && !gameState.boss.isLeaving) {
                 startBossMode();
             }
             return;
@@ -222,6 +224,7 @@ function startNewGame(level) {
     // S'assurer que toutes les images essentielles sont chargées avant de commencer
     if (!gameState.explosionImage || !gameState.explosionImage.complete || 
         !gameState.starBonusImage || !gameState.starBonusImage.complete ||
+        !gameState.heartBonusImage || !gameState.heartBonusImage.complete ||
         !gameState.playerCarImage || !gameState.playerCarImage.complete) {
         setTimeout(() => startNewGame(level), 50);
         return;
@@ -241,7 +244,7 @@ function startGame(level) {
     }
     gameState.running = true;
     gameState.score = 0;
-    gameState.timeLeft = 60;
+    gameState.timeLeft = GAME_CONSTANTS.LEVEL_DURATION;
     gameState.lives = 5;
     gameState.playerX = GAME_CONSTANTS.PLAYER_START_X;
     gameState.playerVelocityX = 0;
@@ -267,23 +270,23 @@ function startGame(level) {
 }
 
 
-function updatePlayer() {
+function updatePlayer(deltaTime = 16.67) {
+    const frameMultiplier = deltaTime / 16.67;
     const maxSpeed = 5;
     const acceleration = 0.5;
-    const deceleration = 0.95;
 
     // Accélération progressive
     if (gameState.keys['ArrowLeft'] && gameState.playerX > 20) {
-        gameState.playerVelocityX = Math.max(gameState.playerVelocityX - acceleration, -maxSpeed);
+        gameState.playerVelocityX = Math.max(gameState.playerVelocityX - acceleration * frameMultiplier, -maxSpeed);
     } else if (gameState.keys['ArrowRight'] && gameState.playerX < 380) {
-        gameState.playerVelocityX = Math.min(gameState.playerVelocityX + acceleration, maxSpeed);
+        gameState.playerVelocityX = Math.min(gameState.playerVelocityX + acceleration * frameMultiplier, maxSpeed);
     } else {
         // Arrêt instantané quand aucune touche n'est pressée
         gameState.playerVelocityX = 0;
     }
 
     // Appliquer la vélocité
-    gameState.playerX += gameState.playerVelocityX;
+    gameState.playerX += gameState.playerVelocityX * frameMultiplier;
     
     // S'assurer qu'on reste dans les limites
     gameState.playerX = Math.max(5, Math.min(395, gameState.playerX));
@@ -389,8 +392,7 @@ function spawnCar(currentTime) {
 }
 
 function spawnBonus(currentTime) {
-    if (gameState.bossMode) return;
-
+    // Les bonus peuvent apparaître même pendant le mode boss
     const config = getLevelConfig(gameState.level);
     if (currentTime - gameState.lastBonusSpawn > config.bonusSpawnRate) {
         const lanes = [33, 100, 167, 234, 301, 367];
@@ -416,9 +418,13 @@ function spawnBonus(currentTime) {
         
         // Seulement ajouter le bonus si on a trouvé une position valide
         if (validPosition) {
+            // Déterminer le type de bonus : 75% moins de chance pour les cœurs
+            const isHeartBonus = Math.random() < 0.25; // 25% de chance (75% moins que les étoiles)
+            
             gameState.bonuses.push({
                 x: bonusX,
-                y: bonusY
+                y: bonusY,
+                type: isHeartBonus ? 'heart' : 'star'
             });
         }
         
@@ -426,11 +432,13 @@ function spawnBonus(currentTime) {
     }
 }
 
-function updateCars() {
+function updateCars(deltaTime = 16.67) {
     const currentTime = performance.now();
 
     gameState.cars = gameState.cars.filter(car => {
-        car.y += car.speed;
+        // Adapter la vitesse au deltaTime (16.67ms = 60fps)
+        const frameMultiplier = deltaTime / 16.67;
+        car.y += car.speed * frameMultiplier;
 
         // Zigzag pour les motos
         if (car.type === 'moto') {
@@ -468,7 +476,7 @@ function updateCars() {
 
         if (car.x !== car.targetX) {
             const diff = car.targetX - car.x;
-            car.x += Math.sign(diff) * Math.min(Math.abs(diff), 2);
+            car.x += Math.sign(diff) * Math.min(Math.abs(diff), 2 * frameMultiplier);
         }
 
         if (car.y > gameState.playerY + 50 && !car.scored) {
@@ -480,12 +488,15 @@ function updateCars() {
     });
 }
 
-function updateBonuses() {
+function updateBonuses(deltaTime = 16.67) {
     const config = getLevelConfig(gameState.level);
-    const bonusSpeed = 3 + (config.carSpeed - 2) * 0.5; // Moitié moins vite que l'accélération des voitures
+    const baseSpeed = 3 + (config.carSpeed - 2) * 0.5; // Moitié moins vite que l'accélération des voitures
     
     gameState.bonuses = gameState.bonuses.filter(bonus => {
-        bonus.y += bonusSpeed;
+        const frameMultiplier = deltaTime / 16.67;
+        // Les cœurs vont 20% plus vite que les étoiles (par défaut: étoile)
+        const bonusSpeed = bonus.type === 'heart' ? baseSpeed * 1.2 : baseSpeed;
+        bonus.y += bonusSpeed * frameMultiplier;
         return bonus.y < canvas.height + 30;
     });
 }
@@ -493,8 +504,8 @@ function updateBonuses() {
 
 function startBossMode() {
     gameState.bossMode = true;
-    // Ne pas supprimer les voitures existantes, elles continuent leur route
-    gameState.bonuses = [];
+    // Ne pas supprimer les voitures et bonus existants, ils continuent leur route
+    // gameState.bonuses = []; // Supprimé : les bonus restent disponibles
     gameState.projectiles = [];
     gameState.bombs = [];
 
@@ -511,7 +522,12 @@ function startBossMode() {
         sequenceIndex: 0,
         nextShotTime: 0,
         // Choisir un boss aléatoire parmi ceux disponibles
-        imageIndex: gameState.bossImages.length > 0 ? Math.floor(Math.random() * gameState.bossImages.length) : 0
+        imageIndex: gameState.bossImages.length > 0 ? Math.floor(Math.random() * gameState.bossImages.length) : 0,
+        // Animation de sortie
+        isLeaving: false,
+        exitSpeed: 0,
+        // Temps de début pour la barre de progression
+        startTime: performance.now()
     };
 
     if (gameState.level >= 10) {
@@ -525,22 +541,67 @@ function startBossMode() {
     }
 }
 
-function endBossMode() {
-    gameState.bossMode = false;
-    gameState.boss = null;
-    // Ne pas supprimer les projectiles et bombes, ils continuent leur route
-    gameState.levelStartTime = performance.now();
+function startBossExit() {
+    if (gameState.boss && !gameState.boss.isLeaving) {
+        gameState.boss.isLeaving = true;
+        gameState.boss.exitSpeed = 2; // Vitesse de sortie vers le haut
+        
+        // Reprendre immédiatement le trafic normal
+        gameState.bossMode = false;
+        gameState.levelStartTime = performance.now(); // Redémarrer le timer de niveau
+        
+        // Passer au niveau suivant
+        gameState.level = Math.min(gameState.level + 1, 25);
+        // Ajouter 5 vies tous les 5 niveaux
+        if (gameState.level % 5 === 0) {
+            gameState.lives += 5;
+            createNotification(t('game.bonusLives', { lives: 5 }), '#22c55e');
+        }
+        document.getElementById('levelDisplay').textContent = gameState.level;
+        showLevelUpMessage();
+    }
 }
 
-function updateBoss() {
+function endBossMode() {
+    // Cette fonction ne fait maintenant que supprimer le boss
+    gameState.boss = null;
+    // Ne pas supprimer les projectiles et bombes, ils continuent leur route
+}
+
+function updateBoss(deltaTime = 16.67) {
     if (!gameState.boss) return;
 
     const currentTime = performance.now();
     const boss = gameState.boss;
+    const frameMultiplier = deltaTime / 16.67;
 
-    boss.x += boss.moveDirection * 1;
-    if (boss.x <= 80 || boss.x >= 320) {
+    if (boss.isLeaving) {
+        // Animation de sortie vers le haut
+        boss.exitSpeed += 0.2 * frameMultiplier; // Accélération progressive
+        boss.y -= boss.exitSpeed * frameMultiplier;
+        
+        // Si le boss est complètement sorti de l'écran, terminer le mode boss
+        if (boss.y < -100) {
+            endBossMode();
+            return;
+        }
+        
+        // Pendant la sortie, pas de mouvement latéral ni de tir
+        return;
+    }
+
+    // Calculer la nouvelle position potentielle
+    const newX = boss.x + boss.moveDirection * 1 * frameMultiplier;
+    
+    // Limites strictes pour tenir compte de la largeur du boss (50px de chaque côté)
+    // Canvas fait 400px de large, boss fait 100px de large
+    // Boss doit rester entre X=50 et X=350 pour être entièrement visible
+    if (newX < 50 || newX > 350) {
         boss.moveDirection *= -1;
+        // Garder le boss dans les limites
+        boss.x = Math.max(50, Math.min(350, boss.x));
+    } else {
+        boss.x = newX;
     }
 
     const shootRate = Math.max(2500 - (gameState.level * 50), 800);
@@ -628,19 +689,22 @@ function updateBoss() {
     });
 }
 
-function updateProjectiles() {
+function updateProjectiles(deltaTime = 16.67) {
     gameState.projectiles = gameState.projectiles.filter(proj => {
-        proj.x += proj.vx;
-        proj.y += proj.vy;
+        const frameMultiplier = deltaTime / 16.67;
+        proj.x += proj.vx * frameMultiplier;
+        proj.y += proj.vy * frameMultiplier;
         return proj.y < canvas.height + 20 && proj.y > -20 && proj.x > -20 && proj.x < canvas.width + 20;
     });
 }
 
-function updateBombs() {
+function updateBombs(deltaTime = 16.67) {
+    const frameMultiplier = deltaTime / 16.67;
+    
     gameState.bombs = gameState.bombs.filter(bomb => {
         if (bomb.phase === 'flying') {
             // Mouvement linéaire vers la cible
-            const speed = 3; // Vitesse ajustable en pixels par frame
+            const speed = 3 * frameMultiplier; // Vitesse ajustable en pixels par frame
             const dx = bomb.targetX - bomb.x;
             const dy = bomb.targetY - bomb.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -661,7 +725,7 @@ function updateBombs() {
             }
         } else if (bomb.phase === 'exploding') {
             // Phase d'explosion
-            bomb.timer--;
+            bomb.timer -= frameMultiplier;
             if (bomb.timer <= 0) {
                 return false; // Supprimer la bombe
             }
@@ -672,7 +736,6 @@ function updateBombs() {
 }
 
 function checkCollisions() {
-    const config = getLevelConfig(gameState.level);
 
     // Vérifier les collisions avec les voitures (même en mode boss)
     gameState.cars = gameState.cars.filter(car => {
@@ -718,22 +781,27 @@ function checkCollisions() {
         return true;
     });
 
-    // Vérifier les collisions avec les bonus (seulement hors mode boss)
-    if (!gameState.bossMode) {
-        gameState.bonuses = gameState.bonuses.filter(bonus => {
-            const distance = Math.sqrt(
-                Math.pow(gameState.playerX - bonus.x, 2) +
-                Math.pow(gameState.playerY - bonus.y, 2)
-            );
+    // Vérifier les collisions avec les bonus (toujours actives)
+    gameState.bonuses = gameState.bonuses.filter(bonus => {
+        const distance = Math.sqrt(
+            Math.pow(gameState.playerX - bonus.x, 2) +
+            Math.pow(gameState.playerY - bonus.y, 2)
+        );
 
-            if (distance < 25) {
+        if (distance < 25) {
+            if (bonus.type === 'heart') {
+                // Bonus cœur : +1 vie
+                gameState.lives += 1;
+                createNotification(t('game.bonusLife', { lives: 1 }), '#e74c3c');
+            } else {
+                // Bonus étoile (par défaut) : +5 points
                 gameState.score += 5;
-                createNotification('+5 points', '#f1c40f');
-                return false;
+                createNotification(t('game.bonusPoints', { points: 5 }), '#f1c40f');
             }
-            return true;
-        });
-    }
+            return false;
+        }
+        return true;
+    });
 
     gameState.projectiles = gameState.projectiles.filter(proj => {
         const distance = Math.sqrt(
@@ -790,15 +858,10 @@ function checkLevelProgression() {
     if (timeSinceLevel >= gameState.levelDuration && !gameState.bossMode) {
         startBossMode();
     } else if (timeSinceLevel >= gameState.levelDuration + 10 && gameState.bossMode) {
-        endBossMode();
-        gameState.level = Math.min(gameState.level + 1, 25);
-        // Ajouter 5 vies tous les 5 niveaux
-        if (gameState.level % 5 === 0) {
-            gameState.lives += 5;
-            createNotification('+5 vies', '#22c55e');
+        // Commencer l'animation de sortie du boss (qui reprend automatiquement le trafic)
+        if (gameState.boss && !gameState.boss.isLeaving) {
+            startBossExit();
         }
-        document.getElementById('levelDisplay').textContent = gameState.level;
-        showLevelUpMessage();
     }
 }
 
@@ -816,7 +879,7 @@ function showLevelUpMessage() {
     message.style.fontWeight = 'bold';
     message.style.zIndex = '30';
     message.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-    message.textContent = `🎉 NIVEAU ${gameState.level} ! 🎉`;
+    message.textContent = t('game.levelUp', { level: gameState.level });
 
     document.getElementById('gameContainer').appendChild(message);
 
@@ -890,22 +953,38 @@ function drawPlayer() {
 }
 
 function drawBonus(bonus) {
-    if (gameState.starBonusImage && gameState.starBonusImage.complete) {
-        // Dessiner l'étoile SVG
-        ctx.drawImage(gameState.starBonusImage, 
-            bonus.x - 12, 
-            bonus.y - 12, 
-            24, 24);
+    if (bonus.type === 'heart') {
+        // Dessiner le cœur
+        if (gameState.heartBonusImage && gameState.heartBonusImage.complete) {
+            ctx.drawImage(gameState.heartBonusImage, 
+                bonus.x - 12, 
+                bonus.y - 12, 
+                24, 24);
+        } else {
+            // Fallback emoji cœur
+            ctx.fillStyle = '#e74c3c';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('❤️', bonus.x, bonus.y + 4);
+        }
     } else {
-        // Fallback simple en attendant le chargement
-        ctx.fillStyle = '#f1c40f';
-        ctx.beginPath();
-        ctx.arc(bonus.x, bonus.y, 10, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#f39c12';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('⭐', bonus.x, bonus.y + 4);
+        // Dessiner l'étoile (bonus par défaut)
+        if (gameState.starBonusImage && gameState.starBonusImage.complete) {
+            ctx.drawImage(gameState.starBonusImage, 
+                bonus.x - 12, 
+                bonus.y - 12, 
+                24, 24);
+        } else {
+            // Fallback simple en attendant le chargement
+            ctx.fillStyle = '#f1c40f';
+            ctx.beginPath();
+            ctx.arc(bonus.x, bonus.y, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#f39c12';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('⭐', bonus.x, bonus.y + 4);
+        }
     }
 }
 
@@ -917,10 +996,13 @@ function drawBoss() {
     // Dessiner le boss avec SVG si disponible
     if (gameState.bossImages.length > 0 && gameState.bossImages[boss.imageIndex] && gameState.bossImages[boss.imageIndex].complete) {
         const bossImage = gameState.bossImages[boss.imageIndex];
+        // Taille plus équilibrée pour la soucoupe : largeur 100px, hauteur 70px
+        const bossWidth = 100;
+        const bossHeight = 70;
         ctx.drawImage(bossImage, 
-            boss.x - 50, 
-            boss.y - 30, 
-            100, 60);
+            boss.x - bossWidth/2, 
+            boss.y - bossHeight/2, 
+            bossWidth, bossHeight);
     } else {
         // Fallback avec formes géométriques
         ctx.fillStyle = '#e74c3c';
@@ -976,38 +1058,41 @@ function drawBombs() {
             const radius = bomb.radius * explosionProgress;
             const opacity = Math.max(0, 1 - explosionProgress);
             
-            // Explosion principale
-            ctx.fillStyle = `rgba(255, 100, 0, ${opacity * 0.6})`;
-            ctx.beginPath();
-            ctx.arc(bomb.x, bomb.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Cercle extérieur
-            ctx.strokeStyle = `rgba(231, 76, 60, ${opacity})`;
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.arc(bomb.x, bomb.y, radius, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // Cercle intérieur brillant
-            if (explosionProgress < 0.5) {
-                ctx.fillStyle = `rgba(255, 255, 100, ${opacity * 0.8})`;
+            // Seulement dessiner si l'opacité est suffisamment élevée
+            if (opacity > 0.01) {
+                // Explosion principale
+                ctx.fillStyle = `rgba(255, 100, 0, ${opacity * 0.6})`;
                 ctx.beginPath();
-                ctx.arc(bomb.x, bomb.y, radius * 0.3, 0, Math.PI * 2);
+                ctx.arc(bomb.x, bomb.y, radius, 0, Math.PI * 2);
                 ctx.fill();
+                
+                // Cercle extérieur
+                ctx.strokeStyle = `rgba(231, 76, 60, ${opacity})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(bomb.x, bomb.y, radius, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Cercle intérieur brillant
+                if (explosionProgress < 0.5) {
+                    ctx.fillStyle = `rgba(255, 255, 100, ${opacity * 0.8})`;
+                    ctx.beginPath();
+                    ctx.arc(bomb.x, bomb.y, radius * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
         }
     });
 }
 
-function draw() {
+function draw(deltaTime = 16.67) {
     drawRoad();
     
     // Dessiner les entités du jeu
     gameState.cars.forEach(car => drawVehicle(car));
     gameState.bonuses.forEach(bonus => drawBonus(bonus));
     
-    if (gameState.bossMode && gameState.boss) {
+    if (gameState.boss) {
         drawBoss();
     }
     
@@ -1018,18 +1103,19 @@ function draw() {
     drawPlayer();
     
     // Dessiner l'effet de collision
-    drawCollisionEffect();
+    drawCollisionEffect(deltaTime);
     
     // Dessiner la notification
-    drawNotification();
+    drawNotification(deltaTime);
     
     // Indicateur mode debug (toujours appeler pour gérer l'affichage/suppression)
     drawDebugIndicator();
 }
 
-function drawCollisionEffect() {
+function drawCollisionEffect(deltaTime = 16.67) {
     if (gameState.collisionEffect) {
         const effect = gameState.collisionEffect;
+        const frameMultiplier = deltaTime / 16.67;
         
         // Animation d'échelle (explosion puis contraction)
         let size;
@@ -1054,19 +1140,20 @@ function drawCollisionEffect() {
         }
         
         // Décrémenter le timer
-        effect.timer--;
+        effect.timer -= frameMultiplier;
         if (effect.timer <= 0) {
             gameState.collisionEffect = null;
         }
     }
 }
 
-function drawNotification() {
+function drawNotification(deltaTime = 16.67) {
     if (gameState.livesNotification) {
         const notification = gameState.livesNotification;
+        const frameMultiplier = deltaTime / 16.67;
         
         // Animation de montée et de disparition
-        notification.y -= 1; // Remonte de 1 pixel par frame
+        notification.y -= frameMultiplier; // Remonte de 1 pixel par frame
         notification.opacity = notification.timer / 120; // Disparition progressive
         
         // Dessiner le texte
@@ -1086,7 +1173,7 @@ function drawNotification() {
         ctx.restore();
         
         // Décrémenter le timer
-        notification.timer--;
+        notification.timer -= frameMultiplier;
         if (notification.timer <= 0) {
             gameState.livesNotification = null;
         }
@@ -1127,16 +1214,16 @@ function drawDebugIndicator() {
     
     let modeText = '';
     switch(gameState.debugMode.vehicleFilter) {
-        case 'car': modeText = 'Que des voitures'; break;
-        case 'truck': modeText = 'Que des camions'; break;
-        case 'moto': modeText = 'Que des motos'; break;
+        case 'car': modeText = t('debug.carsOnly'); break;
+        case 'truck': modeText = t('debug.trucksOnly'); break;
+        case 'moto': modeText = t('debug.motosOnly'); break;
         case 'boss': 
-            modeText = `Boss permanent (Niveau ${gameState.level})<br><small>+/- pour changer niveau</small>`; 
+            modeText = `${t('debug.bossLevel', { level: gameState.level })}<br><small>${t('debug.changeLevelHint')}</small>`; 
             break;
     }
     
     document.getElementById('debugInfo').innerHTML = `
-        <strong>MODE DEBUG</strong><br>
+        <strong>${t('debug.title')}</strong><br>
         ${modeText}
     `;
 }
@@ -1150,12 +1237,12 @@ function drawPauseOverlay() {
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('PAUSE', canvas.width / 2, canvas.height / 2 - 20);
+    ctx.fillText(t('game.pause'), canvas.width / 2, canvas.height / 2 - 20);
     
     // Instructions
     ctx.font = '20px Arial';
     ctx.fillStyle = '#bdc3c7';
-    ctx.fillText('Appuyez sur P pour reprendre', canvas.width / 2, canvas.height / 2 + 30);
+    ctx.fillText(t('game.resumeGame'), canvas.width / 2, canvas.height / 2 + 30);
 }
 
 function drawCountdownOverlay() {
@@ -1172,33 +1259,64 @@ function drawCountdownOverlay() {
     // Texte explicatif
     ctx.font = '20px Arial';
     ctx.fillStyle = '#bdc3c7';
-    ctx.fillText('Préparez-vous...', canvas.width / 2, canvas.height / 2 - 50);
+    ctx.fillText(t('game.preparingGame'), canvas.width / 2, canvas.height / 2 - 50);
 }
 
 function updateUI() {
-    document.getElementById('timeDisplay').textContent = Math.max(0, Math.ceil(gameState.timeLeft));
+    updateProgressBar();
     document.getElementById('scoreDisplay').textContent = gameState.score;
     document.getElementById('livesDisplay').textContent = gameState.lives;
     updateLeaderboard();
 }
 
+function updateProgressBar() {
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    if (!progressBar || !progressText) {
+        return; // Éléments pas encore chargés
+    }
+    
+    if (gameState.bossMode && gameState.boss && !gameState.boss.isLeaving) {
+        // Mode boss : barre rouge qui se vide selon le temps de boss restant
+        const bossTimeLeft = Math.max(0, GAME_CONSTANTS.BOSS_DURATION - (performance.now() - gameState.boss.startTime) / 1000);
+        const bossProgress = (bossTimeLeft / GAME_CONSTANTS.BOSS_DURATION) * 100;
+        
+        progressBar.style.width = bossProgress + '%';
+        progressBar.className = 'progress-bar boss-mode';
+        progressText.textContent = `Boss ${Math.ceil(bossTimeLeft)}s`;
+    } else {
+        // Mode normal : barre verte qui se vide selon le temps de niveau restant
+        const levelProgress = (gameState.timeLeft / GAME_CONSTANTS.LEVEL_DURATION) * 100;
+        
+        progressBar.style.width = Math.max(0, levelProgress) + '%';
+        progressBar.className = 'progress-bar';
+        progressText.textContent = `${Math.max(0, Math.ceil(gameState.timeLeft))}s`;
+    }
+}
+
 function updateLeaderboard() {
     const highScores = JSON.parse(localStorage.getItem('highScores')) || [];
     const liveScoresList = document.getElementById('liveScoresList');
+    const lastSavedScoreId = localStorage.getItem('lastSavedScoreId');
     
     if (highScores.length === 0) {
-        liveScoresList.innerHTML = '<div style="text-align: center; color: #bdc3c7; font-size: 12px;">Aucun score</div>';
+        liveScoresList.innerHTML = `<div style="text-align: center; color: #bdc3c7; font-size: 12px;">${t('game.noScores')}</div>`;
         return;
     }
     
-    liveScoresList.innerHTML = highScores.slice(0, 10).map((score, index) => `
-        <div class="live-score-item">
-            <span class="live-score-rank">#${index + 1}</span>
-            <span class="live-score-name">${score.name}</span>
-            <span class="live-score-points">${score.score}</span>
-            <span class="live-score-level">Nv${score.maxLevel || score.level}</span>
-        </div>
-    `).join('');
+    liveScoresList.innerHTML = highScores.slice(0, 10).map((score, index) => {
+        const isLastSaved = score.id && score.id.toString() === lastSavedScoreId;
+        const highlightClass = isLastSaved ? ' last-saved-score' : '';
+        return `
+            <div class="live-score-item${highlightClass}">
+                <span class="live-score-rank">#${index + 1}</span>
+                <span class="live-score-name">${score.name}</span>
+                <span class="live-score-points">${score.score}</span>
+                <span class="live-score-level">Nv${score.maxLevel || score.level}</span>
+            </div>
+        `;
+    }).join('');
 }
 
 function gameLoop() {
@@ -1206,9 +1324,20 @@ function gameLoop() {
 
     const currentTime = performance.now();
     
+    // Initialiser lastUpdate si ce n'est pas fait ou si deltaTime est trop grand
+    if (gameState.lastUpdate === 0 || (currentTime - gameState.lastUpdate) > 100) {
+        gameState.lastUpdate = currentTime;
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+    
+    const deltaTime = currentTime - gameState.lastUpdate;
+    gameState.lastUpdate = currentTime;
+    
     // Gestion du décompte
     if (gameState.countdown.active) {
-        gameState.countdown.timer--;
+        const frameMultiplier = deltaTime / 16.67;
+        gameState.countdown.timer -= frameMultiplier;
         
         if (gameState.countdown.timer <= 0) {
             gameState.countdown.value--;
@@ -1224,7 +1353,7 @@ function gameLoop() {
             }
         }
         
-        draw();
+        draw(deltaTime);
         drawCountdownOverlay();
         requestAnimationFrame(gameLoop);
         return;
@@ -1232,40 +1361,41 @@ function gameLoop() {
     
     // Si le jeu est en pause, on dessine seulement et on sort
     if (gameState.paused) {
-        draw();
+        draw(deltaTime);
         drawPauseOverlay();
         requestAnimationFrame(gameLoop);
         return;
     }
-    
-    const deltaTime = currentTime - gameState.lastUpdate;
-    gameState.lastUpdate = currentTime;
 
     // Mettre à jour le joueur seulement si le jeu est vraiment en cours
     if (!gameState.paused) {
-        updatePlayer();
+        updatePlayer(deltaTime);
     }
 
+    // Toujours mettre à jour le boss s'il existe (même en sortie)
+    if (gameState.boss) {
+        updateBoss(deltaTime);
+    }
+    
+    // Toujours mettre à jour les projectiles et bombes
+    updateProjectiles(deltaTime);
+    updateBombs(deltaTime);
+    
     if (gameState.bossMode) {
-        updateBoss();
-        updateProjectiles();
-        updateBombs();
-        updateCars(); // Les voitures continuent d'avancer pendant le mode boss
-        updateBonuses();
+        updateCars(deltaTime); // Les voitures continuent d'avancer pendant le mode boss
+        spawnBonus(currentTime); // Les bonus peuvent apparaître pendant le mode boss
+        updateBonuses(deltaTime);
     } else {
         spawnCar(currentTime);
         spawnBonus(currentTime);
-        updateCars();
-        updateBonuses();
-        // Continuer à mettre à jour les projectiles même après le boss
-        updateProjectiles();
-        updateBombs();
+        updateCars(deltaTime);
+        updateBonuses(deltaTime);
     }
 
     checkCollisions();
     updateTime(deltaTime);
 
-    draw();
+    draw(deltaTime);
     updateUI();
 
     requestAnimationFrame(gameLoop);
@@ -1274,7 +1404,7 @@ function gameLoop() {
 function endGame() {
     gameState.running = false;
 
-    document.getElementById('finalScore').textContent = `Score Final: ${gameState.score}`;
+    document.getElementById('finalScore').innerHTML = `<span data-i18n="game.finalScore">${t('game.finalScore')}</span>: ${gameState.score}`;
     
     // Pré-remplir le champ nom avec le dernier nom utilisé
     const nameInput = document.getElementById('playerName');
@@ -1292,7 +1422,7 @@ function saveScore() {
     const playerName = document.getElementById('playerName').value.trim();
     
     if (!playerName) {
-        alert('Veuillez entrer votre nom !');
+        alert(t('messages.enterNamePrompt'));
         return;
     }
     
@@ -1303,8 +1433,9 @@ function saveScore() {
     // Récupérer les scores existants
     let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
     
-    // Ajouter le nouveau score
+    // Ajouter le nouveau score avec un ID unique
     const newScore = {
+        id: Date.now() + Math.random(), // ID unique
         name: playerName,
         score: gameState.score,
         level: gameState.level,
@@ -1317,6 +1448,12 @@ function saveScore() {
     // Trier par score décroissant et garder seulement les 10 meilleurs
     highScores.sort((a, b) => b.score - a.score);
     highScores = highScores.slice(0, 10);
+    
+    // Stocker l'ID du dernier score sauvegardé
+    const savedScore = highScores.find(score => score.id === newScore.id);
+    if (savedScore) {
+        localStorage.setItem('lastSavedScoreId', newScore.id);
+    }
     
     // Sauvegarder
     localStorage.setItem('highScores', JSON.stringify(highScores));
@@ -1348,12 +1485,12 @@ function showStartScreen() {
 }
 
 function resetScores() {
-    if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer TOUS les scores sauvegardés ?\n\nCette action est irréversible !')) {
+    if (confirm(t('messages.confirmResetScores'))) {
         localStorage.removeItem('highScores');
         localStorage.removeItem('bestScore');
         gameState.bestScore = 0;
         displayHighScores();
-        alert('✅ Tous les scores ont été supprimés !');
+        alert(t('messages.scoresReset'));
     }
 }
 
@@ -1409,7 +1546,7 @@ function loadEnemyCars() {
     });
     
     // Charger les motos (seulement 3 couleurs)
-    const motoColors = ['red', 'blue', 'green'];
+    const motoColors = ['white', 'blue', 'green'];
     motoColors.forEach((color, index) => {
         const img = new Image();
         img.onload = function() {
@@ -1462,16 +1599,24 @@ function loadStarBonus() {
     img.src = 'svg/misc/star-bonus.svg';
 }
 
-function showDebugMenu() {
-    const choice = prompt(`Mode Debug - Choisissez le type de véhicules à tester :
-    
-1. Mode normal (tous véhicules)
-2. Que des voitures
-3. Que des camions  
-4. Que des motos
-5. Que des boss (mode boss permanent)
+function loadHeartBonus() {
+    const img = new Image();
+    img.onload = () => {
+        gameState.heartBonusImage = img;
+    };
+    img.src = 'svg/misc/heart-bonus.svg';
+}
 
-Tapez le numéro de votre choix :`);
+function showDebugMenu() {
+    const choice = prompt(`${t('debug.chooseVehicles')}
+    
+1. ${t('debug.normalMode')}
+2. ${t('debug.carsOnly')}
+3. ${t('debug.trucksOnly')}  
+4. ${t('debug.motosOnly')}
+5. ${t('debug.bossMode')}
+
+${t('debug.enterChoice')}`);
     
     switch(choice) {
         case '1':
@@ -1503,10 +1648,62 @@ Tapez le numéro de votre choix :`);
     startNewGame(level);
 }
 
-// Initialiser les images et le classement au chargement
-loadPlayerCar();
-loadEnemyCars();
-loadBosses();
-loadExplosion();
-loadStarBonus();
-updateLeaderboard();
+// Fonction pour changer de langue
+async function changeLanguage(lang) {
+    await i18n.setLanguage(lang);
+    // Mettre à jour le sélecteur de langue
+    document.getElementById('languageSelect').value = lang;
+    // Mettre à jour les éléments dynamiques
+    updateDynamicTexts();
+}
+
+// Mettre à jour les textes qui ne sont pas gérés par data-i18n
+function updateDynamicTexts() {
+    // Mettre à jour le score final s'il est affiché
+    const finalScoreElement = document.getElementById('finalScore');
+    if (finalScoreElement && gameState.score !== undefined) {
+        finalScoreElement.innerHTML = `<span data-i18n="game.finalScore">${t('game.finalScore')}</span>: ${gameState.score}`;
+    }
+    
+    // Mettre à jour le leaderboard
+    updateLeaderboard();
+}
+
+// Initialiser le sélecteur de langue
+function initLanguageSelector() {
+    const select = document.getElementById('languageSelect');
+    if (select) {
+        select.value = localStorage.getItem('gameLanguage') || 'fr';
+    }
+}
+
+// Initialisation complète du jeu
+async function initGame() {
+    // Attendre que les traductions soient chargées
+    await i18n.initialize();
+    
+    // Forcer la mise à jour de l'interface après chargement des traductions
+    i18n.updateUI();
+    
+    // Initialiser le sélecteur de langue
+    initLanguageSelector();
+    
+    // Charger les images
+    loadPlayerCar();
+    loadEnemyCars();
+    loadBosses();
+    loadExplosion();
+    loadStarBonus();
+    loadHeartBonus();
+    
+    // Mettre à jour l'interface
+    updateLeaderboard();
+    updateDynamicTexts();
+}
+
+// Initialiser après le chargement du DOM
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGame);
+} else {
+    initGame();
+}

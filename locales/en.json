@@ -1,0 +1,68 @@
+{
+  "game": {
+    "title": "Car Race",
+    "startGame": "Start Game",
+    "level": "Level",
+    "score": "Score", 
+    "lives": "Lives",
+    "time": "Time",
+    "pause": "PAUSE",
+    "gameOver": "🏁 Game Over!",
+    "finalScore": "Final Score",
+    "enterName": "Enter your name",
+    "saveScore": "Save Score",
+    "backToMenu": "Play Again",
+    "bestScores": "Best Scores",
+    "noScores": "No scores",
+    "resetScores": "🗑️ Reset Scores",
+    "levelUp": "LEVEL {level} !",
+    "bonusPoints": "+{points} points",
+    "bonusPoint": "+{points} point",
+    "bonusLives": "+{lives} lives",
+    "bonusLife": "+{lives} life",
+    "preparingGame": "Get ready...",
+    "resumeGame": "Press P to resume",
+    "chooseLevel": "Choose your starting level:",
+    "loading": "Loading...",
+    "progress": "Progress"
+  },
+  "difficulty": {
+    "easy": "1 (Easy)",
+    "normal": "6 (Normal)",
+    "hard": "12 (Hard)",
+    "expert": "18 (Expert)",
+    "hell": "25 (Hell)"
+  },
+  "controls": {
+    "arrows": "Arrow keys to move",
+    "pause": "P to pause",
+    "restart": "R to restart",
+    "debug": "D for debug mode",
+    "enter": "Enter to start",
+    "escape": "Escape (x2) to quit"
+  },
+  "debug": {
+    "title": "DEBUG MODE",
+    "normalMode": "Normal mode (all vehicles)",
+    "carsOnly": "Cars only",
+    "trucksOnly": "Trucks only", 
+    "motosOnly": "Motorcycles only",
+    "bossMode": "Bosses only (permanent boss mode)",
+    "chooseVehicles": "Debug Mode - Choose the type of vehicles to test:",
+    "enterChoice": "Enter your choice number:",
+    "bossLevel": "Permanent boss (Level {level})",
+    "changeLevelHint": "+/- to change level"
+  },
+  "messages": {
+    "enterNamePrompt": "Please enter your name!",
+    "confirmResetScores": "⚠️ Are you sure you want to delete ALL saved scores?\n\nThis action is irreversible!",
+    "scoresReset": "✅ All scores have been deleted!"
+  },
+  "ui": {
+    "rank": "#",
+    "name": "Name",
+    "points": "Points", 
+    "level": "Lv",
+    "date": "Date"
+  }
+}

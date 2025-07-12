@@ -1,0 +1,55 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cœur bonus style jeu -->
+    <defs>
+        <!-- Gradient rouge pour le cœur -->
+        <radialGradient id="heartGrad" cx="50%" cy="30%" r="70%">
+            <stop offset="0%" style="stop-color:#ff6b9d;stop-opacity:1" />
+            <stop offset="60%" style="stop-color:#e74c3c;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#c0392b;stop-opacity:1" />
+        </radialGradient>
+        AmandineFranck1984$
+        <!-- Ombre pour le cœur -->
+        <filter id="heartShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+            <feOffset dx="2" dy="3" result="offset"/>
+            <feComponentTransfer>
+                <feFuncA type="linear" slope="0.5"/>
+            </feComponentTransfer>
+            <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    
+    <!-- Cœur principal -->
+    <path d="M50,25 C50,25 25,10 15,25 C10,35 15,45 50,75 C85,45 90,35 85,25 C75,10 50,25 50,25 Z" 
+          fill="url(#heartGrad)" 
+          stroke="#c0392b" 
+          stroke-width="2"
+          filter="url(#heartShadow)"/>
+    
+    <!-- Reflets brillants -->
+    <ellipse cx="40" cy="30" rx="6" ry="8" fill="#ffffff" opacity="0.4"/>
+    <ellipse cx="35" cy="25" rx="3" ry="4" fill="#ffffff" opacity="0.6"/>
+    
+    <!-- Petites particules scintillantes autour -->
+    <circle cx="25" cy="20" r="1.5" fill="#ff6b9d">
+        <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="75" cy="25" r="1" fill="#ff6b9d">
+        <animate attributeName="opacity" values="1;0;1" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="20" cy="65" r="1.5" fill="#ff6b9d">
+        <animate attributeName="opacity" values="0;1;0" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="80" cy="60" r="1" fill="#ff6b9d">
+        <animate attributeName="opacity" values="1;0;1" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Croix de vie (symbole médical) -->
+    <g opacity="0.7">
+        <rect x="48" y="35" width="4" height="12" fill="#ffffff"/>
+        <rect x="44" y="39" width="12" height="4" fill="#ffffff"/>
+    </g>
+</svg>

@@ -26,6 +26,30 @@ body {
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
+.language-selector {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #2c3e50;
+    border-radius: 8px;
+    border-left: 4px solid #e74c3c;
+}
+
+.language-selector select {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    background: #34495e;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.language-selector select:focus {
+    outline: none;
+    background: #3498db;
+}
+
 .stat-item {
     margin-bottom: 20px;
     padding: 10px;
@@ -50,6 +74,39 @@ body {
     font-size: 20px;
     font-weight: bold;
     color: #ecf0f1;
+}
+
+.progress-container {
+    position: relative;
+    width: 100%;
+    height: 25px;
+    background: #2c3e50;
+    border-radius: 12px;
+    border: 2px solid #34495e;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #27ae60, #2ecc71);
+    border-radius: 10px;
+    transition: width 0.3s ease, background 0.3s ease;
+    width: 100%;
+}
+
+.progress-bar.boss-mode {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #ecf0f1;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
 }
 
 #gameContainer {
@@ -201,13 +258,12 @@ h1, h2 {
 #scoreForm input {
     padding: 8px 12px;
     margin: 0 10px;
-    border: none;
+    border: 2px solid #3498db;
     border-radius: 5px;
     font-size: 16px;
     text-align: center;
     background: #34495e;
     color: white;
-    border: 2px solid #3498db;
 }
 
 #scoreForm input:focus {
@@ -236,6 +292,7 @@ h1, h2 {
     margin: 5px 0;
     background: rgba(44, 62, 80, 0.6);
     border-radius: 5px;
+    border: none;
     border-left: 4px solid #3498db;
 }
 
@@ -296,6 +353,7 @@ h1, h2 {
     margin: 5px 0;
     background: rgba(44, 62, 80, 0.6);
     border-radius: 5px;
+    border: none;
     border-left: 4px solid #3498db;
 }
 
@@ -322,4 +380,34 @@ h1, h2 {
     font-size: 10px;
     color: #3498db;
     margin: 0 8px;
+}
+
+.live-score-item.last-saved-score {
+    background: rgba(46, 204, 113, 0.3);
+    border-left: 4px solid #2ecc71;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.4);
+    animation: highlight-fade 3s ease-out;
+}
+
+@keyframes highlight-fade {
+    0% {
+        background: rgba(46, 204, 113, 0.6);
+        box-shadow: 0 0 15px rgba(46, 204, 113, 0.8);
+    }
+    100% {
+        background: rgba(46, 204, 113, 0.3);
+        box-shadow: 0 0 10px rgba(46, 204, 113, 0.4);
+    }
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
