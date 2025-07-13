@@ -25,11 +25,8 @@
     "progress": "Progression"
   },
   "difficulty": {
-    "easy": "1 (Facile)",
-    "normal": "6 (Normal)",
-    "hard": "12 (Difficile)",
-    "expert": "18 (Expert)",
-    "hell": "25 (Enfer)"
+    "easy": "Enfantin",
+    "hell": "Démoniaque"
   },
   "controls": {
     "move": "Se déplacer",
